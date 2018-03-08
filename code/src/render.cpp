@@ -43,7 +43,12 @@ namespace MyFirstShader
 	GLuint myVAO;
 }
 
-
+namespace MyGeomShader
+{
+	void myInitCode(void);
+	void myCleanupCode(void);
+	void myRenderCode(double currentTime);
+}
 
 ////////////////
 
@@ -118,19 +123,11 @@ void GLinit(int width, int height) {
 
 	//MyFirstShader::myInitCode();
 
-	Cube::setupCube();
-	Axis::setupAxis();
-	Box::setupCube();
+	//Cube::setupCube();
+	//Axis::setupAxis();
+	//Box::setupCube();
 
-
-
-
-
-
-
-
-
-
+	MyGeomShader::myInitCode();
 }
 
 void GLcleanup() {
@@ -140,9 +137,11 @@ void GLcleanup() {
 	*/
 
 	//MyFirstShader::myCleanupCode();
-	Cube::cleanupCube();
-	Box::cleanupCube();
-	Axis::cleanupAxis();
+	//Cube::cleanupCube();
+	//Box::cleanupCube();
+	//Axis::cleanupAxis();
+
+	MyGeomShader::myCleanupCode();
 
 }
 
@@ -173,10 +172,10 @@ void GLrender(double currentTime) {
 
 
 	// render code
-	Box::drawCube();
-	Axis::drawAxis();
-	Cube::drawCube();
-	Cube::draw2Cubes(currentTime);
+	//Box::drawCube();
+	//Axis::drawAxis();
+	//Cube::drawCube();
+	//Cube::draw2Cubes(currentTime);
 
 	// Transfrom Cubes
 
@@ -185,6 +184,7 @@ void GLrender(double currentTime) {
 	//MyFirstShader::myRenderCode(currentTime);
 
 	
+	MyGeomShader::myRenderCode(currentTime);
 
 	ImGui::Render();
 }
@@ -218,6 +218,140 @@ void linkProgram(GLuint program) {
 		glGetProgramInfoLog(program, res, &res, buff);
 		fprintf(stderr, "Error Link: %s", buff);
 		delete[] buff;
+	}
+}
+
+/////////////////////// MY GEOMETRY SHADER
+
+
+namespace MyGeomShader
+{
+	GLuint myRenderProgram;
+	GLuint myVAO;
+
+	void myCleanupCode(void)
+	{
+		glDeleteVertexArrays(1, &myVAO);
+		glDeleteProgram(myRenderProgram);
+	}
+
+	GLuint myShaderCompile(void) 
+	{
+		static const GLchar * vertex_shader_source[] =
+		{
+			"																		\n\
+			#version 330															\n\
+																					\n\
+			void main()																\n\
+			{																		\n\
+				const vec4 vertices[3] = vec4[3](vec4(0.25, -0.25, 0.5, 1.0),		\n\
+												vec4(0.25, 0.25, 0.5, 1.0),			\n\
+												vec4(-0.25, -0.25, 0.5, 1.0));		\n\
+				gl_Position = vertices[gl_VertexID];								\n\
+			}																		\n\
+			"
+		};
+
+		/*
+		gl_Position || posicion del vertice
+		gl_VertexID || puntero posicion dentro de la tarjeta grafica. Le dice en que indice de la array esta.
+		*/
+
+
+		static const GLchar * geom_shader_source[] =
+		{
+			"																		\n\
+			#version 330															\n\
+																					\n\
+			layout(triangles) in;													\n\
+			layout(triangle_strip, max_vertices = 6) out;							\n\
+																					\n\
+			uniform float time;														\n\
+																					\n\
+			void main()																\n\
+			{																		\n\
+				vec4 offset1 = vec4(0.5 + sin(time), 0.5, 0.0, 0.0);							\n\
+				vec4 offset2 = vec4(-0.5 - sin(time), -0.5, 0.0, 0.0);				\n\
+																					\n\
+				for (int i = 0; i < 3; i++)											\n\
+				{																	\n\
+					gl_Position = gl_in[i].gl_Position + offset1;					\n\
+					EmitVertex();													\n\
+				}																	\n\
+				EndPrimitive();														\n\
+																					\n\
+				for (int i = 0; i < 3; i++)											\n\
+				{																	\n\
+					gl_Position = gl_in[i].gl_Position + offset2;					\n\
+					EmitVertex();													\n\
+				}																	\n\
+				EndPrimitive();														\n\
+			}																		\n\
+			"
+		};
+
+		// Las variables "uniform" no cambian en el ciclo de ejecucion del shader.
+
+		static const GLchar * fragment_shader_source[] =
+		{
+			"																		\n\
+			#version 330															\n\
+																					\n\
+			out vec4 color;															\n\
+			void main()																\n\
+			{																		\n\
+				color = vec4 (0.0, 0.8, 1.0, 1.0);									\n\
+			}																		\n\
+			"
+		};
+
+
+		GLuint vertex_shader;
+		GLuint geom_shader;
+		GLuint fragment_shader;
+		GLuint program;
+
+		vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(vertex_shader, 1, vertex_shader_source, NULL);
+		glCompileShader(vertex_shader);
+
+		geom_shader = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(geom_shader, 1, geom_shader_source, NULL);
+		glCompileShader(geom_shader);
+
+		fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(fragment_shader, 1, fragment_shader_source, NULL);
+		glCompileShader(fragment_shader);
+
+		program = glCreateProgram();
+		glAttachShader(program, vertex_shader);
+		glAttachShader(program, geom_shader);
+		glAttachShader(program, fragment_shader);
+		glLinkProgram(program);
+
+		glDeleteShader(vertex_shader);
+		glDeleteShader(geom_shader);
+		glDeleteShader(fragment_shader);
+
+		return program;
+	}
+
+
+	void  myInitCode(void) 
+	{
+		myRenderProgram = myShaderCompile();
+		glCreateVertexArrays(1, &myVAO);
+		glBindVertexArray(myVAO);
+	}
+
+
+	void myRenderCode(double currentTime) 
+	{
+		const GLfloat red[] = { (float)sin(currentTime) * 0.5f + 0.5f, (float)cos(currentTime) * 0.5f + 0.5f, 0.f, 1.f };
+
+		glUseProgram(myRenderProgram);
+		glUniform1f(glGetUniformLocation(myRenderProgram, "time"), (GLfloat) currentTime);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 }
 
