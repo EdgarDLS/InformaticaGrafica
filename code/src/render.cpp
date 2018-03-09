@@ -246,7 +246,7 @@ namespace MyGeomShader
 			{																		\n\
 				const vec4 vertices[3] = vec4[3](vec4(0.25, -0.25, 0.5, 1.0),		\n\
 												vec4(0.25, 0.25, 0.5, 1.0),			\n\
-												vec4(-0.25, -0.25, 0.5, 1.0));		\n\
+												vec4(-0.25, 0.25, 0.5, 1.0));		\n\
 				gl_Position = vertices[gl_VertexID];								\n\
 			}																		\n\
 			"
@@ -264,32 +264,32 @@ namespace MyGeomShader
 			#version 330															\n\
 																					\n\
 			layout(triangles) in;													\n\
-			layout(triangle_strip, max_vertices = 6) out;							\n\
+			layout(triangle_strip, max_vertices = 4) out;							\n\
 																					\n\
 			uniform float time;														\n\
 																					\n\
 			void main()																\n\
 			{																		\n\
-				vec4 offset1 = vec4(0.5 + sin(time), 0.5, 0.0, 0.0);							\n\
+				vec4 offset1 = vec4(0.5 + sin(time), 0.5, 0.0, 0.0);				\n\
 				vec4 offset2 = vec4(-0.5 - sin(time), -0.5, 0.0, 0.0);				\n\
 																					\n\
-				for (int i = 0; i < 3; i++)											\n\
+				const vec4 vertices[4] = vec4[4](vec4(0.25, -0.25, 0.5, 1.0),		\n\
+												vec4(0.25, 0.25, 0.5, 1.0),			\n\
+												vec4(-0.25, -0.25, 0.5, 1.0),		\n\
+												vec4(-0.25, 0.25, 0.5, 1.0));		\n\
+																					\n\
+				for (int i = 0; i < 4; i++)											\n\
 				{																	\n\
-					gl_Position = gl_in[i].gl_Position + offset1;					\n\
+					gl_Position = vertices[i] + gl_in[0].gl_Position + offset1;		\n\
+					glRotatef(sin(time), 0, 0);										\n\
 					EmitVertex();													\n\
 				}																	\n\
 				EndPrimitive();														\n\
 																					\n\
-				for (int i = 0; i < 3; i++)											\n\
-				{																	\n\
-					gl_Position = gl_in[i].gl_Position + offset2;					\n\
-					EmitVertex();													\n\
-				}																	\n\
-				EndPrimitive();														\n\
 			}																		\n\
 			"
 		};
-
+		// triangle_Strip | strip de triangulos unidos
 		// Las variables "uniform" no cambian en el ciclo de ejecucion del shader.
 
 		static const GLchar * fragment_shader_source[] =
@@ -347,8 +347,6 @@ namespace MyGeomShader
 
 	void myRenderCode(double currentTime) 
 	{
-		const GLfloat red[] = { (float)sin(currentTime) * 0.5f + 0.5f, (float)cos(currentTime) * 0.5f + 0.5f, 0.f, 1.f };
-
 		glUseProgram(myRenderProgram);
 		glUniform1f(glGetUniformLocation(myRenderProgram, "time"), (GLfloat) currentTime);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
