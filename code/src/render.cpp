@@ -257,7 +257,6 @@ namespace MyGeomShader
 		gl_VertexID || puntero posicion dentro de la tarjeta grafica. Le dice en que indice de la array esta.
 		*/
 
-
 		static const GLchar * geom_shader_source[] =
 		{
 			"																		\n\
@@ -273,15 +272,14 @@ namespace MyGeomShader
 				vec4 offset1 = vec4(0.5 + sin(time), 0.5, 0.0, 0.0);				\n\
 				vec4 offset2 = vec4(-0.5 - sin(time), -0.5, 0.0, 0.0);				\n\
 																					\n\
-				const vec4 vertices[4] = vec4[4](vec4(0.25, -0.25, 0.5, 1.0),		\n\
-												vec4(0.25, 0.25, 0.5, 1.0),			\n\
-												vec4(-0.25, -0.25, 0.5, 1.0),		\n\
-												vec4(-0.25, 0.25, 0.5, 1.0));		\n\
+				vec4 vertices[4] = vec4[4](vec4(sin(time)/4, -0.25, sin(time)/4, 1.0),		\n\
+												vec4(sin(time)/4, 0.25, sin(time)/4, 1.0),			\n\
+												vec4(-sin(time)/4, -0.25, -sin(time)/4, 1.0),		\n\
+												vec4(-sin(time)/4, 0.25, -sin(time)/4, 1.0));		\n\
 																					\n\
 				for (int i = 0; i < 4; i++)											\n\
 				{																	\n\
-					gl_Position = vertices[i] + gl_in[0].gl_Position + offset1;		\n\
-					glRotatef(sin(time), 0, 0);										\n\
+					gl_Position = vertices[i] + gl_in[0].gl_Position;				\n\
 					EmitVertex();													\n\
 				}																	\n\
 				EndPrimitive();														\n\
