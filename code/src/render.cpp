@@ -228,6 +228,7 @@ namespace MyGeomShader
 {
 	GLuint myRenderProgram;
 	GLuint myVAO;
+	
 
 	void myCleanupCode(void)
 	{
@@ -259,32 +260,33 @@ namespace MyGeomShader
 
 		static const GLchar * geom_shader_source[] =
 		{
-			"																		\n\
-			#version 330															\n\
-																					\n\
-			layout(triangles) in;													\n\
-			layout(triangle_strip, max_vertices = 4) out;							\n\
-																					\n\
-			uniform float time;														\n\
-																					\n\
-			void main()																\n\
-			{																		\n\
-				vec4 offset1 = vec4(0.5 + sin(time), 0.5, 0.0, 0.0);				\n\
-				vec4 offset2 = vec4(-0.5 - sin(time), -0.5, 0.0, 0.0);				\n\
-																					\n\
-				vec4 vertices[4] = vec4[4](vec4(sin(time)/4, -0.25, sin(time)/4, 1.0),		\n\
-												vec4(sin(time)/4, 0.25, sin(time)/4, 1.0),			\n\
-												vec4(-sin(time)/4, -0.25, -sin(time)/4, 1.0),		\n\
-												vec4(-sin(time)/4, 0.25, -sin(time)/4, 1.0));		\n\
-																					\n\
-				for (int i = 0; i < 4; i++)											\n\
-				{																	\n\
-					gl_Position = vertices[i] + gl_in[0].gl_Position;				\n\
-					EmitVertex();													\n\
-				}																	\n\
-				EndPrimitive();														\n\
-																					\n\
-			}																		\n\
+			"																						\n\
+			#version 330																			\n\
+																									\n\
+			layout(triangles) in;																	\n\
+			layout(triangle_strip, max_vertices = 4) out;											\n\
+																									\n\
+			uniform float time;																		\n\
+			uniform mat4 mvpNew;																	\n\
+																									\n\
+			void main()																				\n\
+			{																						\n\
+				vec4 offset1 = vec4(0.5 + sin(time), 0.5, 0.0, 0.0);								\n\
+				vec4 offset2 = vec4(-0.5 - sin(time), -0.5, 0.0, 0.0);								\n\
+																									\n\
+				vec4 vertices[4] = vec4[4](vec4(0.25, -0.25, 0, 1.0),								\n\
+												vec4(0.25, 0.25, 0, 1.0),							\n\
+												vec4(-0.25, -0.25, 0, 1.0),							\n\
+												vec4(-0.25, 0.25, 0, 1.0));							\n\
+																									\n\
+				for (int i = 0; i < 4; i++)															\n\
+				{																					\n\
+					gl_Position = mvpNew * vertices[i];								\n\
+					EmitVertex();																	\n\
+				}																					\n\
+				EndPrimitive();																		\n\
+																									\n\
+			}																						\n\
 			"
 		};
 		// triangle_Strip | strip de triangulos unidos
@@ -342,11 +344,23 @@ namespace MyGeomShader
 		glBindVertexArray(myVAO);
 	}
 
-
+	glm::mat4 newMVP;
 	void myRenderCode(double currentTime) 
 	{
+		/*
+		glm::mat4 newMVP = { cos(currentTime), 1, sin(currentTime), 1.0,
+							1, 1, 1, 1.0,
+							-sin(currentTime), 1, cos(currentTime), 1.0,
+							1, 1, 1, 1.0 };
+		*/
+
+		glm::mat4 rot = glm::rotate(glm::mat4(), 0.05f, glm::vec3(0.f, 1.f, 0.f));
+
+		newMVP = rot * newMVP;
+
 		glUseProgram(myRenderProgram);
 		glUniform1f(glGetUniformLocation(myRenderProgram, "time"), (GLfloat) currentTime);
+		glUniformMatrix4fv(glGetUniformLocation(myRenderProgram, "mvpNew"), 1, GL_FALSE, glm::value_ptr(newMVP));
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 }
