@@ -264,24 +264,91 @@ namespace MyGeomShader
 			#version 330																			\n\
 																									\n\
 			layout(triangles) in;																	\n\
-			layout(triangle_strip, max_vertices = 4) out;											\n\
+			layout(triangle_strip, max_vertices = 24) out;											\n\
 																									\n\
 			uniform float time;																		\n\
 			uniform mat4 mvpNew;																	\n\
+			uniform mat4 mouseMat;																	\n\
 																									\n\
 			void main()																				\n\
 			{																						\n\
 				vec4 offset1 = vec4(0.5 + sin(time), 0.5, 0.0, 0.0);								\n\
 				vec4 offset2 = vec4(-0.5 - sin(time), -0.5, 0.0, 0.0);								\n\
 																									\n\
-				vec4 vertices[4] = vec4[4](vec4(0.25, -0.25, 0, 1.0),								\n\
-												vec4(0.25, 0.25, 0, 1.0),							\n\
-												vec4(-0.25, -0.25, 0, 1.0),							\n\
-												vec4(-0.25, 0.25, 0, 1.0));							\n\
+				vec4 vertices_face0[4] = vec4[4](vec4(0.5, 0, 0, 1.0),								\n\
+												vec4(0, 0, 0, 1.0),									\n\
+												vec4(0.5, 0.5, 0, 1.0),							\n\
+												vec4(0, 0.5, 0, 1.0));								\n\
 																									\n\
 				for (int i = 0; i < 4; i++)															\n\
 				{																					\n\
-					gl_Position = mvpNew * vertices[i];								\n\
+					gl_Position =  mouseMat  * mvpNew * vertices_face0[i];							\n\
+					gl_PrimitiveID = 0;																\n\
+					EmitVertex();																	\n\
+				}																					\n\
+				EndPrimitive();																		\n\
+																									\n\
+				vec4 vertices_face1[4] = vec4[4](vec4(0.5, 0.5, 0, 1.0),							\n\
+												vec4(0, 0.5, 0, 1.0),								\n\
+												vec4(0.5, 0.5, 0.5, 1.0),						\n\
+												vec4(0, 0.5, 0.5, 1.0));							\n\
+																									\n\
+				for (int i = 0; i < 4; i++)															\n\
+				{																					\n\
+					gl_Position =  mouseMat  * mvpNew * vertices_face1[i];							\n\
+					gl_PrimitiveID = 1;																\n\
+					EmitVertex();																	\n\
+				}																					\n\
+				EndPrimitive();																		\n\
+																									\n\
+				vec4 vertices_face2[4] = vec4[4](vec4(0, 0, 0.5, 1.0),								\n\
+												vec4(0.5, 0, 0.5, 1.0),							\n\
+												vec4(0, 0.5, 0.5, 1.0),							\n\
+												vec4(0.5, 0.5, 0.5, 1.0));						\n\
+																									\n\
+				for (int i = 0; i < 4; i++)															\n\
+				{																					\n\
+					gl_Position =  mouseMat  * mvpNew * vertices_face2[i];							\n\
+					gl_PrimitiveID = 2;																\n\
+					EmitVertex();																	\n\
+				}																					\n\
+				EndPrimitive();																		\n\
+																									\n\
+				vec4 vertices_face3[4] = vec4[4](vec4(0, 0, 0, 1.0),								\n\
+												vec4(0.5, 0, 0, 1.0),								\n\
+												vec4(0, 0, 0.5, 1.0),								\n\
+												vec4(0.5, 0, 0.5, 1.0));							\n\
+																									\n\
+				for (int i = 0; i < 4; i++)															\n\
+				{																					\n\
+					gl_Position =  mouseMat  * mvpNew * vertices_face3[i];							\n\
+					gl_PrimitiveID = 3;																\n\
+					EmitVertex();																	\n\
+				}																					\n\
+				EndPrimitive();																		\n\
+																									\n\
+				vec4 vertices_face4[4] = vec4[4](vec4(0, 0, 0, 1.0),								\n\
+												vec4(0, 0, 0.5, 1.0),								\n\
+												vec4(0, 0.5, 0, 1.0),								\n\
+												vec4(0, 0.5, 0.5, 1.0));							\n\
+																									\n\
+				for (int i = 0; i < 4; i++)															\n\
+				{																					\n\
+					gl_Position =  mouseMat  * mvpNew * vertices_face4[i];							\n\
+					gl_PrimitiveID = 4;																\n\
+					EmitVertex();																	\n\
+				}																					\n\
+				EndPrimitive();																		\n\
+																									\n\
+				vec4 vertices_face5[4] = vec4[4](vec4(0.5, 0, 0.5, 1.0),							\n\
+												vec4(0.5, 0, 0, 1.0),								\n\
+												vec4(0.5, 0.5, 0.5, 1.0),						\n\
+												vec4(0.5, 0.5, 0, 1.0));							\n\
+																									\n\
+				for (int i = 0; i < 4; i++)															\n\
+				{																					\n\
+					gl_Position =  mouseMat  * mvpNew * vertices_face5[i];							\n\
+					gl_PrimitiveID = 5;																\n\
 					EmitVertex();																	\n\
 				}																					\n\
 				EndPrimitive();																		\n\
@@ -300,7 +367,16 @@ namespace MyGeomShader
 			out vec4 color;															\n\
 			void main()																\n\
 			{																		\n\
-				color = vec4 (0.0, 0.8, 1.0, 1.0);									\n\
+				vec4 colors[6];														\n\
+																					\n\
+				colors[0] = vec4 (1.0, 0.8, 1.0, 1.0);								\n\
+				colors[1] = vec4 (0.6, 0.2, 0.3, 1.0);								\n\
+				colors[1] = vec4 (0.2, 0.8, 0.9, 1.0);								\n\
+				colors[1] = vec4 (0.7, 0.6, 0.7, 1.0);								\n\
+				colors[1] = vec4 (0.1, 0.9, 0.0, 1.0);								\n\
+				colors[1] = vec4 (0.4, 0.8, 0.0, 1.0);								\n\
+																					\n\
+				color = colors[gl_PrimitiveID];										\n\
 			}																		\n\
 			"
 		};
@@ -355,12 +431,15 @@ namespace MyGeomShader
 		*/
 
 		glm::mat4 rot = glm::rotate(glm::mat4(), 0.05f, glm::vec3(0.f, 1.f, 0.f));
-
 		newMVP = rot * newMVP;
+		glm::mat4 translationMatrix = glm::translate(glm::mat4(), glm::vec3(-0.25f, -0.25f, -0.25f));
+		glm::mat4 matrix = newMVP * translationMatrix;
 
 		glUseProgram(myRenderProgram);
 		glUniform1f(glGetUniformLocation(myRenderProgram, "time"), (GLfloat) currentTime);
-		glUniformMatrix4fv(glGetUniformLocation(myRenderProgram, "mvpNew"), 1, GL_FALSE, glm::value_ptr(newMVP));
+		glUniformMatrix4fv(glGetUniformLocation(myRenderProgram, "mvpNew"), 1, GL_FALSE, glm::value_ptr(matrix));
+		glUniformMatrix4fv(glGetUniformLocation(myRenderProgram, "mouseMat"), 1, GL_FALSE, glm::value_ptr(RV::_MVP));
+		
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 }
